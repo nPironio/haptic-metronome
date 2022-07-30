@@ -1,10 +1,22 @@
+import React, { useState } from "react";
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Button, Vibration, Text, View } from 'react-native';
 
-export default function App() {
+export default function Metronome() {
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app (or else)!</Text>
+      <Button
+        onPress={() => {
+              Vibration.vibrate([250, 100, 150], true); 
+          }}
+        title={"Play"}
+      />
+      <Button
+        onPress={() => {
+            Vibration.cancel();  
+          }}
+        title={"Stop"}
+      />
       <StatusBar style="auto" />
     </View>
   );
