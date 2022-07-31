@@ -1,67 +1,62 @@
 import React, { useState } from "react";
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Button, Vibration, Text, TextInput, View } from 'react-native';
+import Slider from '@react-native-community/slider';
 
 
-// let BPM = 10
-// let pulse_duration = 3000
-// 
 
-// let events_in_pulse = 3
-
-
-function create_pulse(duration, num_events, vibration_in_event, rest_time) {
-  pulse = []
-  console.log(pulse)
-  event_duration = duration/num_events
-  for (let i=0; i<num_events; i++) {
-  pulse.push(event_duration - vibration_in_event)
-  pulse.push(vibration_in_event)
-  }
-  pulse.push(rest_time)
-  return pulse 
+function event_scale(scale, duration) {
+  return Math.round(scale * duration)
 }
-
 
 export default function Metronome() {
   
   const [BPM, setBPM] = useState(60)
-  const [pulse_duration, setPD] = useState(180)
-  const [events_in_pulse, setEP] = useState(100)
-  let rest_time = Math.round(60*1000/BPM) - pulse_duration
-  let event_duration = pulse_duration / events_in_pulse
+  const [pulse_duration, setPD] = useState(50)  
+  const [strong_duration, setSD] = useState(event_scale(0.9, pulse_duration))
+  const [mid_duration, setMD] = useState(event_scale(0.7, pulse_duration))
+  const [light_duration, setLD] = useState(event_scale(0.5, pulse_duration))
 
-  let strong_duration = Math.round(0.999 * event_duration)
-  let mid_duration = Math.round(0.99 * event_duration)
-  let light_duration = Math.round(0.9 * event_duration)
+  let create_pulse = function(vibration_duration) {
+    let pulse = [Math.round(60*1000/BPM) - vibration_duration, vibration_duration] 
+    console.log(pulse)
+    return pulse
+  }
+  
 
   return (
     <View style={styles.container}>
-      <TextInput
-        defaultValue={"BPM"}
-        style = {{height: 40}}
-        onChangeText={newBPM => {
-          setBPM(parseInt(newBPM));
-          rest_time = Math.round(60*1000/BPM) - pulse_duration;        
-        }}
+      <Text> BPM </Text>
+      <Text> {BPM} </Text>
+      <Slider
+        value={BPM}
+        minimumValue={22}
+        maximumValue={300}
+        step={1}
+        onValueChange={newBPM => {
+          setBPM(newBPM);
+        }
+      }
+      style={{"width": 300, "height": 20}}
       />
+
       <Button
-        onPress={() => {
-              Vibration.vibrate(create_pulse(pulse_duration, events_in_pulse, strong_duration, rest_time), true); 
+        onPress={() => {    
+              Vibration.vibrate(create_pulse(strong_duration), true); 
           }}
         title={"Strong"}
       />
 
       <Button
-        onPress={() => {
-              Vibration.vibrate(create_pulse(pulse_duration, events_in_pulse, mid_duration, rest_time), true); 
+        onPress={() => {    
+              Vibration.vibrate(create_pulse(mid_duration), true); 
           }}
-        title={"Mid"}
+        title={"Medium"}
       />
 
       <Button
-        onPress={() => {
-              Vibration.vibrate(create_pulse(pulse_duration, events_in_pulse, light_duration, rest_time), true); 
+        onPress={() => {    
+              Vibration.vibrate(create_pulse(light_duration), true); 
           }}
         title={"Light"}
       />
