@@ -21,7 +21,7 @@ function createBeatStrengthArray(n) {
 
 const Dropdown = (props) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("Strong");
+  const [value, setValue] = useState("strong");
   const [items, setItems] = useState([{label: 'Weak', value: 'weak'},
                                       {label: "Medium", value: "medium"},
                                       {label: "Strong", value: "strong"}]);
@@ -35,6 +35,9 @@ const Dropdown = (props) => {
       setValue={setValue}
       onChangeValue={(new_val) => {props.setFunction(new_val)}}
       setItems={setItems}
+      containerStyle={{width: 80, height:30}}
+      textStyle={{fontSize: 15}}
+      showArrowIcon={false}
     />
     )
 }
@@ -45,9 +48,9 @@ export default function Metronome() {
   const [pulse_duration, setPD] = useState(50)
   const [beat_strengths, setBS] = useState(['strong', 'strong', 'strong', 'strong'])
   
-  const [strong_scale, setSD] = useState(0.9)
-  const [mid_scale, setMD] = useState(0.7)
-  const [weak_scale, setLD] = useState(0.5)
+  const [strong_scale, setSD] = useState(1)
+  const [mid_scale, setMD] = useState(0.6)
+  const [weak_scale, setLD] = useState(0.4)
 
   let modifyBeatIdx = function(idx) {
     const modify = (val) => {
@@ -76,7 +79,7 @@ export default function Metronome() {
   
   return (
     <View style={styles.container}>
-      <Text> BPM </Text>
+      <Text style={{ fontWeight: 'bold' }}> BPM </Text>
       <Text> {BPM} </Text>
       <Slider
         value={BPM}
@@ -86,30 +89,34 @@ export default function Metronome() {
         onValueChange={newBPM => {
           Vibration.cancel()
           setBPM(newBPM);
+          }
         }
-      }
-      style={{"width": 300, "height": 20}}
+        style={{"width": 300, "height": 20}}
       />
     
-    <Text> Beat accents </Text> 
+    <Text style={{ fontWeight: 'bold' }}> Beat accents </Text> 
+    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', 
+                  marginBottom: 30}}>
+      <Dropdown setFunction={modifyBeatIdx(0)} />
+      <Dropdown setFunction={modifyBeatIdx(1)} />
+      <Dropdown setFunction={modifyBeatIdx(2)} />
+      <Dropdown setFunction={modifyBeatIdx(3)} />
+    </View>
 
-    <Dropdown setFunction={modifyBeatIdx(0)} />
-    <Dropdown setFunction={modifyBeatIdx(1)} />
-    <Dropdown setFunction={modifyBeatIdx(2)} />
-    <Dropdown setFunction={modifyBeatIdx(3)} />
-    
-    <Button
-      onPress={() => {Vibration.vibrate(createMeter(beat_strengths), true)}}
-      title={"Play"}
-    />
+    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
+      <Button
+        onPress={() => {Vibration.vibrate(createMeter(beat_strengths), true)}}
+        title={"Play"}
+      />
 
-    <Button
-      onPress={() => {
-          Vibration.cancel();  
-        }}
-      title={"Stop"}
-    />
-      <StatusBar style="auto" />
+      <Button
+        onPress={() => {
+            Vibration.cancel();  
+          }}
+        title={"Stop"}
+      />
+    </View>
+    <StatusBar style="auto" />
     </View>
   );
 }
