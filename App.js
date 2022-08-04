@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Button, Vibration, Text, TextInput, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import DropDownPicker from 'react-native-dropdown-picker';
+import NumericInput from 'react-native-numeric-input';
 
 
 
@@ -10,12 +11,20 @@ function pulse_scale(scale, duration) {
   return Math.round(scale * duration)
 };
 
-const Dropdown = () => {
+function createBeatStrengthArray(n) {
+  let res = []
+  for (let i=0; i<n; i++) {
+    res.push(Dropdown())
+  }
+  return res
+}
+
+const Dropdown = (props) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("Strong");
-  const [items, setItems] = useState([{label: 'Weak', value: 'Weak'},
-                                      {label: "Medium", value: "Medium"},
-                                      {label: "Strong", value: "Strong"}]);
+  const [items, setItems] = useState([{label: 'Weak', value: 'weak'},
+                                      {label: "Medium", value: "medium"},
+                                      {label: "Strong", value: "strong"}]);
 
   return (
     <DropDownPicker
@@ -24,8 +33,8 @@ const Dropdown = () => {
       items={items}
       setOpen={setOpen}
       setValue={setValue}
+      onChangeValue={(new_val) => {props.setFunction(new_val)}}
       setItems={setItems}
-      style={{width: 60, height: 20}}
     />
     )
 }
@@ -33,16 +42,37 @@ const Dropdown = () => {
 export default function Metronome() {
   
   const [BPM, setBPM] = useState(60)
-  const [pulse_duration, setPD] = useState(50)  
+  const [pulse_duration, setPD] = useState(50)
+  const [beat_strengths, setBS] = useState(['strong', 'strong', 'strong', 'strong'])
   
   const [strong_scale, setSD] = useState(0.9)
   const [mid_scale, setMD] = useState(0.7)
   const [weak_scale, setLD] = useState(0.5)
 
-  let create_pulse = function(vibration_scale) {
+  let modifyBeatIdx = function(idx) {
+    const modify = (val) => {
+      let res = [...beat_strengths];
+      res[idx] = val;
+      setBS(res);
+    }
+
+    return modify
+  }
+
+  let createPulse = function(vibration_scale) {
     let vibration_duration = pulse_scale(vibration_scale, pulse_duration)
     return [Math.round(60*1000/BPM) - vibration_duration, vibration_duration]
   }
+
+  let strength_to_pulse = {
+    "weak": createPulse(weak_scale),
+    "medium": createPulse(mid_scale),
+    "strong": createPulse(strong_scale),
+  }
+
+  let createMeter = function(strengths) {
+     return [].concat.apply([], strengths.map(function(s){return strength_to_pulse[s]}))
+  } 
   
   return (
     <View style={styles.container}>
@@ -60,32 +90,17 @@ export default function Metronome() {
       }
       style={{"width": 300, "height": 20}}
       />
-    <Text> Beat accents </Text>
-{/*    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
-      <Dropdown />
-      <Dropdown />
-      <Dropdown />
-      <Dropdown />
-    </View>*/}
-    <Button
-      onPress={() => {    
-            Vibration.vibrate(create_pulse(strong_scale), true); 
-        }}
-      title={"Strong"}
-    />
+    
+    <Text> Beat accents </Text> 
 
+    <Dropdown setFunction={modifyBeatIdx(0)} />
+    <Dropdown setFunction={modifyBeatIdx(1)} />
+    <Dropdown setFunction={modifyBeatIdx(2)} />
+    <Dropdown setFunction={modifyBeatIdx(3)} />
+    
     <Button
-      onPress={() => {    
-            Vibration.vibrate(create_pulse(mid_scale), true); 
-        }}
-      title={"Medium"}
-    />
-
-    <Button
-      onPress={() => {    
-            Vibration.vibrate(create_pulse(weak_scale), true); 
-        }}
-      title={"weak"}
+      onPress={() => {Vibration.vibrate(createMeter(beat_strengths), true)}}
+      title={"Play"}
     />
 
     <Button
