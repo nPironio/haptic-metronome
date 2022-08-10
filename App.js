@@ -11,6 +11,7 @@ function pulse_scale(scale, duration) {
   return Math.round(scale * duration)
 };
 
+
 function createBeatStrengthArray(n) {
   let res = []
   for (let i=0; i<n; i++) {
@@ -42,15 +43,53 @@ const Dropdown = (props) => {
     )
 }
 
+const IntensitySlider = (props) => {
+  return (
+    <View style={{flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+      <Text style={{ fontWeight: 'bold' }}> {props.name} scale </Text>
+        <Text> {props.scale.toFixed(3)} </Text>
+        <Slider
+          value={props.scale}
+          minimumValue={0}
+          maximumValue={1}
+          step={0.001}
+          onValueChange={newIntensity => {
+            Vibration.cancel()
+            props.setFunction(newIntensity);
+            }
+          }
+          style={{"width": 100, "height": 20}}
+        />
+    </View>
+
+
+  )
+}
+
 export default function Metronome() {
   
-  const [BPM, setBPM] = useState(60)
+  const [BPM, setBPM] = useState(90)
   const [pulse_duration, setPD] = useState(50)
   const [beat_strengths, setBS] = useState(['strong', 'strong', 'strong', 'strong'])
   
   const [strong_scale, setSD] = useState(1)
   const [mid_scale, setMD] = useState(0.6)
   const [weak_scale, setLD] = useState(0.4)
+
+
+  let [min_BPM, max_BPM] = [22, 220]
+  let BPM_range = max_BPM - min_BPM
+  
+
+  let scale_set = function(bpm, max) {
+    return (1/Math.exp((bpm-min_BPM)/BPM_range)) * max
+  }
+
+  let setScales = function(bpm) {
+    setSD(scale_set(bpm, 0.99))
+    setMD(scale_set(bpm, 0.75))
+    setLD(scale_set(bpm, 0.65))
+  }
 
   let modifyBeatIdx = function(idx) {
     const modify = (val) => {
@@ -79,20 +118,28 @@ export default function Metronome() {
   
   return (
     <View style={styles.container}>
+      
       <Text style={{ fontWeight: 'bold' }}> BPM </Text>
       <Text> {BPM} </Text>
       <Slider
         value={BPM}
-        minimumValue={22}
-        maximumValue={300}
+        minimumValue={min_BPM}
+        maximumValue={max_BPM}
         step={1}
         onValueChange={newBPM => {
           Vibration.cancel()
           setBPM(newBPM);
+          setScales(newBPM)
           }
         }
         style={{"width": 300, "height": 20}}
       />
+
+      <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
+        <IntensitySlider scale={weak_scale} name={"Weak"} setFunction={setLD} />
+        <IntensitySlider scale={mid_scale} name={"Medium"} setFunction={setMD} />
+        <IntensitySlider scale={strong_scale} name={"Strong"} setFunction={setSD} />
+      </View>
     
     <Text style={{ fontWeight: 'bold' }}> Beat accents </Text> 
     <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', 
