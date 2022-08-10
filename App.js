@@ -71,24 +71,25 @@ export default function Metronome() {
   const [BPM, setBPM] = useState(90)
   const [pulse_duration, setPD] = useState(50)
   const [beat_strengths, setBS] = useState(['strong', 'strong', 'strong', 'strong'])
-  
-  const [strong_scale, setSD] = useState(1)
-  const [mid_scale, setMD] = useState(0.6)
-  const [weak_scale, setLD] = useState(0.4)
 
 
   let [min_BPM, max_BPM] = [22, 220]
   let BPM_range = max_BPM - min_BPM
-  
 
   let scale_set = function(bpm, max) {
-    return (1/Math.exp((bpm-min_BPM)/BPM_range)) * max
+    return (1/Math.exp(0.2*(bpm-min_BPM)/BPM_range)) * max
   }
+  
+  const [strong_scale, setSD] = useState(scale_set(BPM, 1))
+  const [mid_scale, setMD] = useState(scale_set(BPM, 0.8))
+  const [weak_scale, setLD] = useState(scale_set(BPM, 0.6))
 
+
+  
   let setScales = function(bpm) {
-    setSD(scale_set(bpm, 0.99))
-    setMD(scale_set(bpm, 0.75))
-    setLD(scale_set(bpm, 0.65))
+    setSD(scale_set(bpm, 1))
+    setMD(scale_set(bpm, 0.8))
+    setLD(scale_set(bpm, 0.6))
   }
 
   let modifyBeatIdx = function(idx) {
